@@ -1,0 +1,85 @@
+---
+export const prerender = false;
+import MainLayout from '../../layouts/MainLayout.astro';
+
+const { id } = Astro.params;
+const apiUrl = `https://api.openalex.org/works/doi:${id}?mailto=admin@kxdigital.com`;
+const response = await fetch(apiUrl);
+
+let data = {};
+let isError = false; // Variabel penanda error
+
+if (response.ok) {
+  data = await response.json();
+} else {
+  isError = true; // Jika DOI salah, tandai error (jangan lempar ke /404)
+}
+
+const judul = data.title || "Title not available";
+const urlAsli = data.doi || "-";
+const tahun = data.publication_year || "-";
+const namaPenerbit = data.primary_location?.source?.display_name || "Unknown Publisher";
+
+let pengarang = "Unknown Author";
+if (data.authorships && data.authorships.length > 0) {
+  pengarang = data.authorships[0].author.display_name;
+}
+
+let abstrak = "Abstract not available for this article.";
+if (data.abstract_inverted_index) {
+  const invertedIndex = data.abstract_inverted_index;
+  const maxIndex = Math.max(...Object.values(invertedIndex).flat());
+  let words = new Array(maxIndex + 1).fill("");
+  
+  for (const [word, positions] of Object.entries(invertedIndex)) {
+    for (const pos of positions) {
+      words[pos] = word;
+    }
+  }
+  abstrak = words.join(" ");
+}
+---
+
+<MainLayout title={isError ? "Article Not Found" : judul}>
+  
+  {/* BLOK LOGIKA: Jika DOI salah/tidak ada, tampilkan pesan ini */}
+  {isError ? (
+    <div style="text-align: center; padding: 50px 20px; background: #fff3f3; border-radius: 8px; border: 1px solid #ffcdd2;">
+      <h1 style="color: #c0392b; margin-top: 0; font-size: 28px;">Article Not Found</h1>
+      <p style="color: #555; font-size: 16px; margin-top: 15px;">
+        We couldn't find any article associated with the DOI: <br/>
+        <strong style="font-size: 20px; color: #333; display: block; margin-top: 10px;">{id}</strong>
+      </p>
+      <p style="color: #777; font-size: 14px; margin-top: 25px;">
+        Please check if the DOI is typed correctly, or try searching using the title or author name.
+      </p>
+    </div>
+  ) : (
+    
+    /* BLOK LOGIKA: Jika DOI benar, tampilkan jurnal normal seperti biasa */
+    <>
+      <span style="background: #3498db; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+        DOI: {id}
+      </span>
+      
+      <h1 style="margin-top: 15px; font-size: 28px; line-height: 1.4; color: #1a1a1a;">
+        {judul}
+      </h1>
+      
+      <ul style="list-style-type: none; padding: 0; margin-top: 25px; color: #444;">
+        <li style="margin-bottom: 12px;">👤 <strong>Lead Author:</strong> {pengarang}</li>
+        <li style="margin-bottom: 12px;">📅 <strong>Publication Year:</strong> {tahun}</li>
+        <li style="margin-bottom: 12px;">📚 <strong>Journal / Publisher:</strong> {namaPenerbit}</li>
+        <li style="margin-bottom: 12px;">🔗 <strong>Source Link:</strong> <a href={urlAsli} target="_blank" style="color: #3498db; text-decoration: none;">{urlAsli}</a></li>
+      </ul>
+
+      <hr style="margin: 35px 0 25px 0; border: 0; border-top: 1px solid #eaeaea;" />
+      
+      <h3 style="margin-bottom: 15px; color: #2c3e50;">Abstract</h3>
+      <p style="text-align: justify; font-size: 16px; color: #555; line-height: 1.8;">
+        {abstrak}
+      </p>
+    </>
+  )}
+
+</MainLayout>
