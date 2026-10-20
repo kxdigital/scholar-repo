@@ -14,14 +14,19 @@ if (query.trim().length > 0) {
     if (cleanQuery.startsWith('10.')) {
       apiUrl = `https://api.openalex.org/works/https://doi.org/${encodeURIComponent(cleanQuery)}`;
     } else {
-      apiUrl = `https://api.openalex.org/works?search=${encodeURIComponent(cleanQuery)}&per_page=15`;
+      // Menggunakan mailto untuk masuk ke OpenAlex polite pool (mengurangi risiko error 429)
+      apiUrl = `https://api.openalex.org/works?search=${encodeURIComponent(cleanQuery)}&per_page=15&mailto=contact@visitlink.net`;
     }
 
     const response = await fetch(apiUrl, {
       headers: {
-        'User-Agent': 'VisitLink/1.0 (https://visitlink.net; mailto:contact@visitlink.net)'
+        'User-Agent': 'VisitLinkAcademicSearch/1.0 (https://visitlink.net; mailto:contact@visitlink.net)'
       }
     });
+
+    if (response.status === 429) {
+      throw new Error('Too many requests. Please wait a moment before searching again.');
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -36,7 +41,7 @@ if (query.trim().length > 0) {
     }
   } catch (err) {
     console.error("Fetch error detail:", err);
-    error = `Failed to fetch data from server: ${err.message}`;
+    error = err.message;
   }
 }
 ---
