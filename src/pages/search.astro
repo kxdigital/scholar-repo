@@ -12,21 +12,18 @@ if (query.trim().length > 0) {
     const cleanQuery = query.trim();
     
     if (cleanQuery.startsWith('10.')) {
-      apiUrl = `https://api.openalex.org/works/https://doi.org/${encodeURIComponent(cleanQuery)}`;
+      // Endpoint Crossref untuk DOI
+      apiUrl = `https://api.crossref.org/works/${encodeURIComponent(cleanQuery)}`;
     } else {
-      // Menggunakan mailto untuk masuk ke OpenAlex polite pool (mengurangi risiko error 429)
-      apiUrl = `https://api.openalex.org/works?search=${encodeURIComponent(cleanQuery)}&per_page=15&mailto=contact@visitlink.net`;
+      // Endpoint Crossref untuk Keyword Search
+      apiUrl = `https://api.crossref.org/works?query=${encodeURIComponent(cleanQuery)}&rows=15`;
     }
 
     const response = await fetch(apiUrl, {
       headers: {
-        'User-Agent': 'VisitLinkAcademicSearch/1.0 (https://visitlink.net; mailto:contact@visitlink.net)'
+        'User-Agent': 'VisitLink/1.0 (https://visitlink.net; mailto:contact@visitlink.net)'
       }
     });
-
-    if (response.status === 429) {
-      throw new Error('Too many requests. Please wait a moment before searching again.');
-    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -35,13 +32,16 @@ if (query.trim().length > 0) {
     const data = await response.json();
     
     if (cleanQuery.startsWith('10.')) {
-      results = data && data.id ? [data] : [];
+      // Crossref mengembalikan objek tunggal di dalam message untuk DOI
+      const item = data.message;
+      results = item ? [item] : [];
     } else {
-      results = data.results || [];
+      // Crossref mengembalikan array item di dalam message.items untuk keyword
+      results = data.message?.items || [];
     }
   } catch (err) {
     console.error("Fetch error detail:", err);
-    error = err.message;
+    error = `Failed to fetch data: ${err.message}`;
   }
 }
 ---
@@ -66,15 +66,15 @@ if (query.trim().length > 0) {
 
     <div style="display: flex; flex-direction: column; gap: 20px;">
       {results.map((work) => {
-        const title = work.title || "Untitled Document";
-        const doi = work.doi ? work.doi.replace("https://doi.org/", "") : "N/A";
-        const publicationYear = work.publication_year || "Unknown Year";
-        const authors = work.authorships?.map(a => a.author?.display_name || a.author?.name).filter(Boolean).join(', ') || "Unknown Author";
+        const title = work.title?.[0] || "Untitled Document";
+        const doi = work.DOI || "N/A";
+        const publicationYear = work['published-print']?.['date-parts']?.[0]?.[0] || work['published-online']?.['date-parts']?.[0]?.[0] || "Unknown Year";
+        const authors = work.author?.map(a => `${a.given || ''} ${a.family || ''}`.trim()).filter(Boolean).join(', ') || "Unknown Author";
 
         return (
           <div style="background: white; border: 1px solid #e1e8ed; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <h3 style="margin: 0 0 8px 0; font-size: 18px;">
-              <a href={work.doi || "#"} target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">
+              <a href={`https://doi.org/${doi}`} target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">
                 {title}
               </a>
             </h3>
