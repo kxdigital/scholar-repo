@@ -1,21 +1,32 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 
+// Mengambil parameter query 'q' dari URL
 const query = Astro.url.searchParams.get('q') || '';
 
 let results = [];
 let error = null;
 
-if (query) {
+if (query.trim().length > 0) {
   try {
-    // Menggunakan endpoint API OpenAlex yang kompatibel
-    const response = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}`);
-    const data = await response.json();
+    // OpenAlex merekomendasikan menyertakan email (mailto) agar tidak dibatasi/dihambat
+    const apiUrl = `https://api.openalex.org/works?search=${encodeURIComponent(query)}&per_page=15&mailto=contact@visitlink.net`;
     
-    // OpenAlex mengembalikan hasil di dalam properti .results
+    const response = await fetch(apiUrl, {
+      headers: {
+        'User-Agent': 'VisitLink/1.0 (https://visitlink.net; mailto:contact@visitlink.net)'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
     results = data.results || [];
   } catch (err) {
-    error = "Gagal mengambil data pencarian. Silakan coba beberapa saat lagi.";
+    console.error("Search fetch error:", err);
+    error = "Gagal mengambil data dari server. Silakan coba kata kunci lain.";
   }
 }
 ---
@@ -43,7 +54,7 @@ if (query) {
         const title = work.title || "Untitled Document";
         const doi = work.doi ? work.doi.replace("https://doi.org/", "") : "N/A";
         const publicationYear = work.publication_year || "Unknown Year";
-        const authors = work.authorships?.map(a => a.author?.display_name || a.author?.name).join(', ') || "Unknown Author";
+        const authors = work.authorships?.map(a => a.author?.display_name || a.author?.name).filter(Boolean).join(', ') || "Unknown Author";
 
         return (
           <div style="background: white; border: 1px solid #e1e8ed; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
