@@ -1,7 +1,6 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 
-// Mengambil parameter query 'q' dari URL
 const query = Astro.url.searchParams.get('q') || '';
 
 let results = [];
@@ -9,9 +8,15 @@ let error = null;
 
 if (query.trim().length > 0) {
   try {
-    // OpenAlex merekomendasikan menyertakan email (mailto) agar tidak dibatasi/dihambat
-    const apiUrl = `https://api.openalex.org/works?search=${encodeURIComponent(query)}&per_page=15&mailto=contact@visitlink.net`;
+    let apiUrl = '';
+    const cleanQuery = query.trim();
     
+    if (cleanQuery.startsWith('10.')) {
+      apiUrl = `https://api.openalex.org/works/https://doi.org/${encodeURIComponent(cleanQuery)}`;
+    } else {
+      apiUrl = `https://api.openalex.org/works?search=${encodeURIComponent(cleanQuery)}&per_page=15`;
+    }
+
     const response = await fetch(apiUrl, {
       headers: {
         'User-Agent': 'VisitLink/1.0 (https://visitlink.net; mailto:contact@visitlink.net)'
@@ -19,14 +24,19 @@ if (query.trim().length > 0) {
     });
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    results = data.results || [];
+    
+    if (cleanQuery.startsWith('10.')) {
+      results = data && data.id ? [data] : [];
+    } else {
+      results = data.results || [];
+    }
   } catch (err) {
-    console.error("Search fetch error:", err);
-    error = "Gagal mengambil data dari server. Silakan coba kata kunci lain.";
+    console.error("Fetch error detail:", err);
+    error = `Failed to fetch data from server: ${err.message}`;
   }
 }
 ---
