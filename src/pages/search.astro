@@ -12,10 +12,8 @@ if (query.trim().length > 0) {
     const cleanQuery = query.trim();
     
     if (cleanQuery.startsWith('10.')) {
-      // Endpoint Crossref untuk DOI
       apiUrl = `https://api.crossref.org/works/${encodeURIComponent(cleanQuery)}`;
     } else {
-      // Endpoint Crossref untuk Keyword Search
       apiUrl = `https://api.crossref.org/works?query=${encodeURIComponent(cleanQuery)}&rows=15`;
     }
 
@@ -32,11 +30,9 @@ if (query.trim().length > 0) {
     const data = await response.json();
     
     if (cleanQuery.startsWith('10.')) {
-      // Crossref mengembalikan objek tunggal di dalam message untuk DOI
       const item = data.message;
       results = item ? [item] : [];
     } else {
-      // Crossref mengembalikan array item di dalam message.items untuk keyword
       results = data.message?.items || [];
     }
   } catch (err) {
@@ -74,7 +70,8 @@ if (query.trim().length > 0) {
         return (
           <div style="background: white; border: 1px solid #e1e8ed; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <h3 style="margin: 0 0 8px 0; font-size: 18px;">
-              <a href={`https://doi.org/${doi}`} target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">
+              <!-- Tautan diarahkan ke halaman internal /jurnal/[doi] -->
+              <a href={`/jurnal/${encodeURIComponent(doi)}`} style="color: #3498db; text-decoration: none;">
                 {title}
               </a>
             </h3>
