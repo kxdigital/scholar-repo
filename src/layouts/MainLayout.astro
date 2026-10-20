@@ -6,50 +6,67 @@ const { title } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} - Academic Document Repository</title>
+    <title>{title} - VisitLink Academic Repository</title>
+    <!-- Google AdSense Global Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7815118323095868"
+     crossorigin="anonymous"></script>
   </head>
   <body style="margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: #f4f7f6; color: #333;">
     
     <!-- Navigation Bar -->
     <nav style="background: #2c3e50; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 15px;">
       <div style="color: white; font-size: 22px; font-weight: bold;">
-        <a href="/" style="color: white; text-decoration: none;">ScholarRepo</a>
+        <a href="/" style="color: white; text-decoration: none;">VisitLink</a>
       </div>
       
-      <div style="display: flex; gap: 20px; font-size: 15px; align-items: center;">
+      <div style="display: flex; gap: 20px; font-size: 15px; align-items: center; flex-wrap: wrap;">
         <a href="/" style="color: #ecf0f1; text-decoration: none;">Home</a>
         <a href="/about" style="color: #ecf0f1; text-decoration: none;">About</a>
         <a href="/contact" style="color: #ecf0f1; text-decoration: none;">Contact</a>
         <a href="/disclaimer" style="color: #ecf0f1; text-decoration: none;">Disclaimer</a>
         
         <!-- Search Box -->
-        <form action="/search" method="get" style="display: flex; margin: 0; margin-left: 20px;">
+        <form action="/search" method="get" style="display: flex; margin: 0;">
           <input type="text" name="q" placeholder="Title, author, or DOI..." required style="padding: 6px 12px; border-radius: 4px 0 0 4px; border: none; outline: none; width: 200px;" />
           <button type="submit" style="padding: 6px 12px; background: #3498db; color: white; border: none; border-radius: 0 4px 4px 0; cursor: pointer; font-weight: bold;">Search</button>
         </form>
       </div>
     </nav>
 
-    <!-- Header Ad Slot (468x60) -->
-    <div style="text-align: center; margin: 25px auto;">
-      <div style="width: 468px; height: 60px; background: #e0e0e0; border: 1px dashed #999; display: inline-flex; align-items: center; justify-content: center; color: #666; font-size: 14px;">
-        Advertisement Slot (468 x 60)
-      </div>
+    <!-- Header Ad Slot (Responsive Banner - drespo) -->
+    <div style="text-align: center; margin: 25px auto; max-width: 1200px; padding: 0 20px;">
+      <!-- drespo -->
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-7815118323095868"
+           data-ad-slot="8519814635"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
     </div>
 
     <!-- Main Content & Sidebar Area -->
-    <div style="max-width: 1200px; margin: 0 auto; display: flex; gap: 30px; padding: 0 20px; align-items: flex-start;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; gap: 30px; padding: 0 20px; align-items: flex-start; flex-wrap: wrap;">
       
       <!-- Left Article Content -->
-      <main style="flex: 1; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); min-height: 500px;">
-        <slot /> <!-- Konten dari halaman lain akan disuntikkan ke sini -->
+      <main style="flex: 1; min-width: 280px; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); min-height: 500px;">
+        <slot />
       </main>
 
       <!-- Right Sidebar -->
-      <aside style="width: 300px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0;">
-        <!-- Sidebar Ad Slot (300x250) -->
-        <div style="width: 300px; height: 250px; background: #e0e0e0; border: 1px dashed #999; display: flex; align-items: center; justify-content: center; color: #666; font-size: 14px; border-radius: 4px;">
-          Advertisement Slot (300 x 250)
+      <aside style="width: 300px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; margin: 0 auto;">
+        <!-- Sidebar Ad Slot (300x250 - d300) -->
+        <div style="width: 300px; min-height: 250px; background: #fff; display: flex; align-items: center; justify-content: center; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+          <!-- d300 -->
+          <ins class="adsbygoogle"
+               style="display:inline-block;width:300px;height:250px"
+               data-ad-client="ca-pub-7815118323095868"
+               data-ad-slot="4030345835"></ins>
+          <script>
+               (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
         </div>
         
         <!-- Sidebar Extra Widget -->
@@ -64,7 +81,7 @@ const { title } = Astro.props;
 
     <!-- Footer -->
     <footer style="text-align: center; padding: 30px; margin-top: 50px; background: #2c3e50; color: white; font-size: 14px;">
-      <p style="margin: 0;">&copy; {new Date().getFullYear()} ScholarRepo. All rights reserved.</p>
+      <p style="margin: 0;">&copy; {new Date().getFullYear()} VisitLink. All rights reserved.</p>
       <p style="margin: 5px 0 0 0; color: #95a5a6; font-size: 12px;">Provided "as is" without warranty. Read our Disclaimer for more details.</p>
     </footer>
 

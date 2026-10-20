@@ -1,13 +1,58 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+
+// Contoh data pencarian terakhir (bisa Anda hubungkan ke database/localStorage nanti)
+const recentSearches = [
+  { query: "Machine Learning in Healthcare", doi: "10.1016/j.compbiomed.2023.107", time: "2 minutes ago" },
+  { query: "Quantum Cryptography Protocols", doi: "10.1103/PhysRevA.105.042321", time: "15 minutes ago" },
+  { query: "Sustainable Urban Planning 2025", doi: "10.1080/01441647.2024.218", time: "1 hour ago" },
+  { query: "CRISPR Gene Editing Advances", doi: "10.1038/s41587-023-018", time: "3 hours ago" }
+];
 ---
 
-<MainLayout title="Home">
-  <h1>Welcome to ScholarRepo</h1>
-  <p>Search and explore millions of academic documents, journal metadata, and abstracts efficiently.</p>
-  
-  <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 6px; border: 1px solid #eee;">
-    <p>To view an article, append the DOI to our URL.</p>
-    <code>Example: yourdomain.com/jurnal/10.1038/s41401-024-01339-z</code>
+<MainLayout title="Home - Academic Repository">
+  <div style="padding: 20px 10px;">
+    
+    {/* Bagian Utama / Hero Search */}
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h1 style="color: #2c3e50; font-size: 30px; margin-bottom: 10px;">Welcome to VisitLink</h1>
+      <p style="color: #666; font-size: 15px; margin-bottom: 25px;">
+        Explore open-access academic documents, research papers, and DOIs instantly.
+      </p>
+      
+      {/* Kotak Pencarian Besar di Tengah */}
+      <form action="/search" method="get" style="display: inline-flex; width: 100%; max-width: 600px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-radius: 6px; overflow: hidden;">
+        <input 
+          type="text" 
+          name="q" 
+          placeholder="Search by title, author, keywords, or DOI..." 
+          required 
+          style="flex: 1; padding: 14px 18px; border: 1px solid #ddd; border-right: none; outline: none; font-size: 15px;" 
+        />
+        <button type="submit" style="padding: 0 24px; background: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; font-size: 15px;">
+          Search
+        </button>
+      </form>
+    </div>
+
+    {/* Bagian Aktivitas / Pencarian Terakhir agar tidak kosong */}
+    <div style="background: #fdfdfd; border: 1px solid #eaeaea; border-radius: 8px; padding: 25px; margin-top: 30px;">
+      <h3 style="margin-top: 0; color: #2c3e50; font-size: 18px; border-bottom: 2px solid #3498db; padding-bottom: 10px; display: inline-block;">
+        Recent Community Searches
+      </h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+        {recentSearches.map((item) => (
+          <a href={`/search?q=${encodeURIComponent(item.query)}`} style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: white; border: 1px solid #e5e5e5; border-radius: 6px; text-decoration: none; color: inherit; transition: border-color 0.2s;">
+            <div>
+              <span style="font-weight: 600; color: #3498db; font-size: 15px;">{item.query}</span>
+              <span style="display: block; font-size: 12px; color: #888; margin-top: 3px;">DOI: {item.doi}</span>
+            </div>
+            <span style="font-size: 12px; color: #aaa; background: #f4f7f6; padding: 4px 8px; border-radius: 4px;">{item.time}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
   </div>
 </MainLayout>
