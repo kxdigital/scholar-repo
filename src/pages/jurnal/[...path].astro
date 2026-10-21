@@ -2,8 +2,14 @@
 export const prerender = false;
 import MainLayout from '../../layouts/MainLayout.astro';
 
+// Mengambil parameter dari URL dinamis
 const { path } = Astro.params;
-const cleanId = Array.isArray(path) ? path.join('/') : (path || '').trim();
+
+// Menggabungkan array path jika ada, lalu men-decode karakter seperti %2F menjadi garis miring (/)
+const rawPath = Array.isArray(path) ? path.join('/') : (path || '');
+const cleanId = decodeURIComponent(rawPath).trim();
+
+// Endpoint Crossref API
 const apiUrl = `https://api.crossref.org/works/${encodeURIComponent(cleanId)}`;
 
 let data = {};
@@ -32,10 +38,13 @@ const tahun = data['published-print']?.['date-parts']?.[0]?.[0] || data['publish
 const namaPenerbit = data.publisher || "Unknown Publisher";
 const namaJurnal = data['container-title']?.[0] || "";
 
+// Mengambil Direct PDF Link dari Crossref
 let pdfUrl = "";
 if (data.link && data.link.length > 0) {
   const pdfLinkObj = data.link.find(l => l['content-type'] === 'application/pdf');
-  if (pdfLinkObj) pdfUrl = pdfLinkObj.URL;
+  if (pdfLinkObj) {
+    pdfUrl = pdfLinkObj.URL;
+  }
 }
 if (!pdfUrl && data.DOI) {
   pdfUrl = `https://doi.org/${data.DOI}`;
@@ -58,9 +67,16 @@ const currentUrl = `https://visitlink.net/jurnal/${cleanId}`;
 
 <MainLayout title={isError ? "Article Not Found" : judul}>
   
+  {/* SEO Meta Tags & Google Scholar */}
   <Fragment slot="head">
     <meta name="description" content={abstrak.substring(0, 160) + "..."} />
     <link rel="canonical" href={currentUrl} />
+
+    <meta property="og:title" content={judul} />
+    <meta property="og:description" content={abstrak.substring(0, 160) + "..."} />
+    <meta property="og:url" content={currentUrl} />
+    <meta property="og:type" content="article" />
+
     {!isError && (
       <>
         <meta name="citation_title" content={judul} />
@@ -68,6 +84,7 @@ const currentUrl = `https://visitlink.net/jurnal/${cleanId}`;
           <meta name="citation_author" content={auth} />
         ))}
         <meta name="citation_publication_date" content={tahun} />
+        {namaJurnal && <meta name="citation_journal_abbrev" content={namaJurnal} />}
         <meta name="citation_doi" content={cleanId} />
         {pdfUrl && <meta name="citation_pdf_url" content={pdfUrl} />}
       </>
@@ -81,6 +98,9 @@ const currentUrl = `https://visitlink.net/jurnal/${cleanId}`;
         We couldn't find any article associated with the DOI: <br/>
         <strong style="font-size: 20px; color: #333; display: block; margin-top: 10px;">{cleanId}</strong>
       </p>
+      <p style="color: #777; font-size: 14px; margin-top: 25px;">
+        Please check if the DOI is typed correctly, or try searching using the title or author name.
+      </p>
     </div>
   ) : (
     <>
@@ -91,7 +111,7 @@ const currentUrl = `https://visitlink.net/jurnal/${cleanId}`;
 
         {pdfUrl && (
           <a href={pdfUrl} target="_blank" rel="noopener noreferrer" style="background: #27ae60; color: white; padding: 6px 16px; border-radius: 4px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
-            ?? View / Download PDF
+            📄 View / Download PDF
           </a>
         )}
       </div>
@@ -101,11 +121,11 @@ const currentUrl = `https://visitlink.net/jurnal/${cleanId}`;
       </h1>
       
       <ul style="list-style-type: none; padding: 0; margin-top: 25px; color: #444; line-height: 1.6;">
-        <li style="margin-bottom: 10px;">?? <strong>Authors:</strong> {pengarang}</li>
-        {namaJurnal && <li style="margin-bottom: 10px;">?? <strong>Journal:</strong> {namaJurnal}</li>}
-        <li style="margin-bottom: 10px;">?? <strong>Publisher:</strong> {namaPenerbit}</li>
-        <li style="margin-bottom: 10px;">?? <strong>Publication Year:</strong> {tahun}</li>
-        <li style="margin-bottom: 10px;">?? <strong>DOI Link:</strong> <a href={urlAsli} target="_blank" style="color: #3498db; text-decoration: none;">{urlAsli}</a></li>
+        <li style="margin-bottom: 10px;">👤 <strong>Authors:</strong> {pengarang}</li>
+        {namaJurnal && <li style="margin-bottom: 10px;">📖 <strong>Journal:</strong> {namaJurnal}</li>}
+        <li style="margin-bottom: 10px;">📚 <strong>Publisher:</strong> {namaPenerbit}</li>
+        <li style="margin-bottom: 10px;">📅 <strong>Publication Year:</strong> {tahun}</li>
+        <li style="margin-bottom: 10px;">🔗 <strong>DOI Link:</strong> <a href={urlAsli} target="_blank" style="color: #3498db; text-decoration: none;">{urlAsli}</a></li>
       </ul>
 
       <hr style="margin: 35px 0 25px 0; border: 0; border-top: 1px solid #eaeaea;" />
