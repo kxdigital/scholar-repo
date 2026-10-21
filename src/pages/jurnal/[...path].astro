@@ -2,8 +2,8 @@
 export const prerender = false;
 import MainLayout from '../../layouts/MainLayout.astro';
 
-const { id } = Astro.params;
-const cleanId = id ? decodeURIComponent(id).trim() : '';
+const { path } = Astro.params;
+const cleanId = Array.isArray(path) ? path.join('/') : (path || '').trim();
 const apiUrl = `https://api.crossref.org/works/${encodeURIComponent(cleanId)}`;
 
 let data = {};
@@ -31,19 +31,12 @@ const urlAsli = data.DOI ? `https://doi.org/${data.DOI}` : "-";
 const tahun = data['published-print']?.['date-parts']?.[0]?.[0] || data['published-online']?.['date-parts']?.[0]?.[0] || "Unknown Year";
 const namaPenerbit = data.publisher || "Unknown Publisher";
 const namaJurnal = data['container-title']?.[0] || "";
-const volume = data.volume ? `Vol. ${data.volume}` : "";
-const issue = data.issue ? `No. ${data.issue}` : "";
-const halaman = data.page ? `pp. ${data.page}` : "";
 
-// Mengambil Direct PDF Link jika tersedia di metadata Crossref
 let pdfUrl = "";
 if (data.link && data.link.length > 0) {
-  const pdfLinkObj = data.link.find(l => l['content-type'] === 'application/pdf' || l.intended-application === 'vor');
-  if (pdfLinkObj) {
-    pdfUrl = pdfLinkObj.URL;
-  }
+  const pdfLinkObj = data.link.find(l => l['content-type'] === 'application/pdf');
+  if (pdfLinkObj) pdfUrl = pdfLinkObj.URL;
 }
-// Fallback jika tidak ada di array link, cek license atau gunakan DOI standar
 if (!pdfUrl && data.DOI) {
   pdfUrl = `https://doi.org/${data.DOI}`;
 }
@@ -68,12 +61,6 @@ const currentUrl = `https://visitlink.net/jurnal/${cleanId}`;
   <Fragment slot="head">
     <meta name="description" content={abstrak.substring(0, 160) + "..."} />
     <link rel="canonical" href={currentUrl} />
-
-    <meta property="og:title" content={judul} />
-    <meta property="og:description" content={abstrak.substring(0, 160) + "..."} />
-    <meta property="og:url" content={currentUrl} />
-    <meta property="og:type" content="article" />
-
     {!isError && (
       <>
         <meta name="citation_title" content={judul} />
@@ -81,7 +68,6 @@ const currentUrl = `https://visitlink.net/jurnal/${cleanId}`;
           <meta name="citation_author" content={auth} />
         ))}
         <meta name="citation_publication_date" content={tahun} />
-        <meta name="citation_journal_abbrev" content={namaJurnal || namaPenerbit} />
         <meta name="citation_doi" content={cleanId} />
         {pdfUrl && <meta name="citation_pdf_url" content={pdfUrl} />}
       </>
@@ -103,10 +89,9 @@ const currentUrl = `https://visitlink.net/jurnal/${cleanId}`;
           DOI: {cleanId}
         </span>
 
-        {/* Tombol Direct PDF / Read Article */}
         {pdfUrl && (
           <a href={pdfUrl} target="_blank" rel="noopener noreferrer" style="background: #27ae60; color: white; padding: 6px 16px; border-radius: 4px; font-size: 13px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
-            📄 View / Download PDF
+            ?? View / Download PDF
           </a>
         )}
       </div>
@@ -116,11 +101,11 @@ const currentUrl = `https://visitlink.net/jurnal/${cleanId}`;
       </h1>
       
       <ul style="list-style-type: none; padding: 0; margin-top: 25px; color: #444; line-height: 1.6;">
-        <li style="margin-bottom: 10px;">👤 <strong>Authors:</strong> {pengarang}</li>
-        {namaJurnal && <li style="margin-bottom: 10px;">📖 <strong>Journal:</strong> {namaJurnal}</li>}
-        <li style="margin-bottom: 10px;">📚 <strong>Publisher:</strong> {namaPenerbit}</li>
-        <li style="margin-bottom: 10px;">📅 <strong>Publication Year:</strong> {tahun} {volume || issue || halaman ? `(${[volume, issue, halaman].filter(Boolean.join(', '))})` : ''}</li>
-        <li style="margin-bottom: 10px;">🔗 <strong>DOI Link:</strong> <a href={urlAsli} target="_blank" style="color: #3498db; text-decoration: none;">{urlAsli}</a></li>
+        <li style="margin-bottom: 10px;">?? <strong>Authors:</strong> {pengarang}</li>
+        {namaJurnal && <li style="margin-bottom: 10px;">?? <strong>Journal:</strong> {namaJurnal}</li>}
+        <li style="margin-bottom: 10px;">?? <strong>Publisher:</strong> {namaPenerbit}</li>
+        <li style="margin-bottom: 10px;">?? <strong>Publication Year:</strong> {tahun}</li>
+        <li style="margin-bottom: 10px;">?? <strong>DOI Link:</strong> <a href={urlAsli} target="_blank" style="color: #3498db; text-decoration: none;">{urlAsli}</a></li>
       </ul>
 
       <hr style="margin: 35px 0 25px 0; border: 0; border-top: 1px solid #eaeaea;" />
